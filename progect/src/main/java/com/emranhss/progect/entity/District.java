@@ -16,7 +16,13 @@ public class District {
     private String name;
 
     @OneToMany(mappedBy = "district" ,cascade = CascadeType.ALL)
+    //sir ekhane jsonignor disa
     private List<PoliceStation>policeStations;
+
+
+    @ManyToOne
+    @JoinColumn(name = "division_id")
+    private Division division;
 
 
     public District() {
@@ -29,6 +35,7 @@ public class District {
     }
 
     public  District(List<PoliceStation>policeStations){
+
         this.policeStations = policeStations;
     }
 
@@ -54,5 +61,13 @@ public class District {
 
     public void setPoliceStations(List<PoliceStation> policeStations) {
         this.policeStations = policeStations;
+    }
+
+    public Division getDivision() {
+        return division;
+    }
+
+    public void setDivision(Division division) {
+        this.division = division;
     }
 }

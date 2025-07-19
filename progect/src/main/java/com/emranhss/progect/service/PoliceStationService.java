@@ -23,15 +23,20 @@ public class PoliceStationService {
     private IDistrictRepo districtRepo;
 
     public List<PoliceStationResponseDTO> getAllPoliceStationDTO(){
+
         return policeStationRepo.findAll().stream().map(ps ->{
             PoliceStationResponseDTO dto = new PoliceStationResponseDTO();
             dto.setId(ps.getId());
             dto.setName(ps.getName());
+
             if (ps.getDistrict() !=null){
+
                 dto.setDistrictId(ps.getDistrict().getId());
                 dto.setDistrictName(ps.getDistrict().getName());
             }
+
             return dto;
+
         }).toList();
 
     }
@@ -40,12 +45,14 @@ public class PoliceStationService {
 
     @Transactional
     public PoliceStation create(PoliceStation policeStation){
+
         if (policeStation.getDistrict() !=null){
             int districtId = policeStation.getDistrict().getId();
             District district = districtRepo.findById(districtId)
                     .orElseThrow(() -> new RuntimeException("District not found with id "+districtId));
-             policeStation.save(district);
+             policeStation.setDistrict(district);
         }
+
         return policeStationRepo.save(policeStation);
     }
 
@@ -65,17 +72,18 @@ public class PoliceStationService {
 
 
 
+    // Update
+    public PoliceStation update(int id,PoliceStation updatePoliceStation) {
 
-    public void update(int id,PoliceStation updatePoliceStation) {
         PoliceStation existing = policeStationRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("PoliceStation not found with id " + id));
-        existing.setName(updatedPoliceStation.getName());
+        existing.setName(updatePoliceStation.getName());
 
 
-        if (updatedPoliceStation.getDistrict() != null) {
+        if (updatePoliceStation.getDistrict() != null) {
             // Optionally verify district exists
-            District district = districtRepo.findById(updatedPoliceStation.getDistrict().getId())
-                    .orElseThrow(() -> new RuntimeException("District not found with id " + updatedPoliceStation.getDistrict().getId()));
+            District district = districtRepo.findById(updatePoliceStation.getDistrict().getId())
+                    .orElseThrow(() -> new RuntimeException("District not found with id " + updatePoliceStation.getDistrict().getId()));
             existing.setDistrict(district);
         }
 

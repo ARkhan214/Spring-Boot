@@ -27,7 +27,6 @@ public class Division {
     @OneToMany(mappedBy = "division",cascade = CascadeType.ALL)
     private List<District> districts;
 
-
     public int getId() {
         return id;
     }
@@ -56,5 +55,7 @@ public class Division {
         return districts;
     }
 
-
+    public void setDistricts(List<District> districts) {
+        this.districts = districts;
+    }
 }
