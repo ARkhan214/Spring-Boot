@@ -5,9 +5,16 @@ import com.emranhss.progect.entity.User;
 import com.emranhss.progect.repository.IUserRepo;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -18,8 +25,17 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
+@Value("src/main/resources/static/images")
+    private String uploadDir;
 
-    public void seveOrUpda(User user){
+    public void seveOrUpda(User user,MultipartFile imageFile) {
+
+        if (imageFile != null && !imageFile.isEmpty()){
+            String fileName = saveImage(imageFile,user);
+            user.setPhoto(fileName);
+        }
+
+
         userRepo.save(user);
         sendActivationEmail(user);
     }
@@ -65,7 +81,7 @@ public class UserService {
                 + "      <p>Best regards,<br>The Support Team</p>"
                 + "    </div>"
                 + "    <div class='footer'>"
-                + "      &copy; " + java.time.Year.now() + " YourCompany. All rights reserved."
+                + "      &copy; " + java.time.Year.now() + " Khan Industry. All rights reserved."
                 + "    </div>"
                 + "  </div>"
                 + "</body>"
@@ -76,6 +92,28 @@ public class UserService {
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send activation email", e);
         }
+    }
+
+    public String saveImage(MultipartFile file,User user) {
+        Path uploadPath = Paths.get(uploadDir+"/users");
+        if (!Files.exists(uploadPath)) {
+            try {
+                Files.createDirectory(uploadPath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        String fileName = user.getName()+"_"+ UUID.randomUUID().toString()+".jpg";
+
+
+        try {
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(),filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return fileName;
     }
 
 
