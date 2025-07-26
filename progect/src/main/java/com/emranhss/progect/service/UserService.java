@@ -1,6 +1,7 @@
 package com.emranhss.progect.service;
 
 
+import com.emranhss.progect.entity.Role;
 import com.emranhss.progect.entity.User;
 import com.emranhss.progect.repository.IUserRepo;
 import jakarta.mail.MessagingException;
@@ -14,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,30 +27,30 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
-@Value("src/main/resources/static/images")
+    @Value("src/main/resources/static/images")
     private String uploadDir;
 
-    public void seveOrUpda(User user,MultipartFile imageFile) {
+    public void seveOrUpda(User user, MultipartFile imageFile) {
 
-        if (imageFile != null && !imageFile.isEmpty()){
-            String fileName = saveImage(imageFile,user);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String fileName = saveImage(imageFile, user);
             user.setPhoto(fileName);
         }
 
-
+        user.setRole(Role.JOBSEEKER);
         userRepo.save(user);
         sendActivationEmail(user);
     }
 
-    public List<User>findAll(){
+    public List<User> findAll() {
         return userRepo.findAll();
     }
 
-    public User findById(int id){
+    public User findById(int id) {
         return userRepo.findById(id).get();
     }
 
-    public void delete(User user){
+    public void delete(User user) {
         userRepo.delete(user);
     }
 
@@ -94,8 +96,8 @@ public class UserService {
         }
     }
 
-    public String saveImage(MultipartFile file,User user) {
-        Path uploadPath = Paths.get(uploadDir+"/users");
+    public String saveImage(MultipartFile file, User user) {
+        Path uploadPath = Paths.get(uploadDir + "/users");
         if (!Files.exists(uploadPath)) {
             try {
                 Files.createDirectory(uploadPath);
@@ -104,16 +106,32 @@ public class UserService {
             }
         }
 
-        String fileName = user.getName()+"_"+ UUID.randomUUID().toString()+".jpg";
+        String name = user.getName();
+
+// Replace spaces with underscore
+        String safeName = name.trim().replaceAll("\\s+", "_");
+
+
+        String fileName = safeName+ "_" + UUID.randomUUID().toString() + ".jpg";
 
 
         try {
             Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(),filePath);
+            Files.copy(file.getInputStream(), filePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return fileName;
+    }
+
+
+    public void deleteUserById(Integer id) {
+        Optional<User> userOpt = userRepo.findById(id);
+        if (userOpt.isPresent()) {
+            userRepo.deleteById(id);
+        } else {
+            throw new RuntimeException("User not found with ID: " + id);
+        }
     }
 
 

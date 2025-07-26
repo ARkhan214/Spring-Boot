@@ -51,9 +51,15 @@ public class UserRestController {
     }
 
     @GetMapping("")
-    public ResponseEntity<String> getAllUser(){
+    public ResponseEntity<List<User>> getAllUser(){
         List<User> users=userService.findAll();
-           return ResponseEntity.ok("users: "+users.toString());
+           return ResponseEntity.ok(users);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
+        userService.deleteUserById(id);
+        return ResponseEntity.ok().body(Map.of("message", "User deleted"));
     }
 
 }
