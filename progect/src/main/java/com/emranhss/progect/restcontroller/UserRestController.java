@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -47,6 +48,12 @@ public class UserRestController {
             errorResponse.put("Message","User Add Failed");
             return new  ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("")
+    public ResponseEntity<String> getAllUser(){
+        List<User> users=userService.findAll();
+           return ResponseEntity.ok("users: "+users.toString());
     }
 
 }
