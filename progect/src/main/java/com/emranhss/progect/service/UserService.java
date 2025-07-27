@@ -50,8 +50,8 @@ public class UserService {
         return userRepo.findById(id).get();
     }
 
-    public void delete(User user) {
-        userRepo.delete(user);
+    public void delete(int id) {
+        userRepo.deleteById(id);
     }
 
 

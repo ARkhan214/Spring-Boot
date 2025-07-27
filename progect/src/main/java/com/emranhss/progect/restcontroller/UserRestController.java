@@ -56,10 +56,12 @@ public class UserRestController {
            return ResponseEntity.ok(users);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
-        userService.deleteUserById(id);
-        return ResponseEntity.ok().body(Map.of("message", "User deleted"));
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable int id) {
+        userService.delete(id);
+        return ResponseEntity.ok("User deleted successfully");
     }
+
+
 
 }
