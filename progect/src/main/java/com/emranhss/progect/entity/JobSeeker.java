@@ -3,6 +3,9 @@ package com.emranhss.progect.entity;
 
 import jakarta.persistence.*;
 
+import javax.xml.crypto.Data;
+import java.util.Date;
+
 @Entity
 public class JobSeeker {
 
@@ -16,7 +19,7 @@ public class JobSeeker {
     private String phone;
     private String gender;
     private String address;
-    private String dateOfBirth;
+    private Date dateOfBirth;
     private  String photo;
 
 
@@ -24,11 +27,10 @@ public class JobSeeker {
     @JoinColumn(name = "user_id",nullable = false)
     private User user;
 
-
     public JobSeeker() {
     }
 
-    public JobSeeker(Long id, String name, String email, String phone, String gender, String address, String dateOfBirth, String photo, User user) {
+    public JobSeeker(Long id, String name, String email, String phone, String gender, String address, Date dateOfBirth, String photo, User user) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -88,11 +90,11 @@ public class JobSeeker {
         this.address = address;
     }
 
-    public String getDateOfBirth() {
+    public Date getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

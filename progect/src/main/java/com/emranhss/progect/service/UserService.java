@@ -1,6 +1,7 @@
 package com.emranhss.progect.service;
 
 
+import com.emranhss.progect.entity.JobSeeker;
 import com.emranhss.progect.entity.Role;
 import com.emranhss.progect.entity.User;
 import com.emranhss.progect.repository.IUserRepo;
@@ -27,6 +28,10 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private JobSeekerService jobSeekerService;
+
+
     @Value("src/main/resources/static/images")
     private String uploadDir;
 
@@ -50,8 +55,8 @@ public class UserService {
         return userRepo.findById(id).get();
     }
 
-    public void delete(int id) {
-        userRepo.deleteById(id);
+    public void delete(User user) {
+        userRepo.delete(user);
     }
 
 
@@ -96,6 +101,7 @@ public class UserService {
         }
     }
 
+
     public String saveImage(MultipartFile file, User user) {
         Path uploadPath = Paths.get(uploadDir + "/users");
         if (!Files.exists(uploadPath)) {
@@ -106,14 +112,7 @@ public class UserService {
             }
         }
 
-        String name = user.getName();
-
-// Replace spaces with underscore
-        String safeName = name.trim().replaceAll("\\s+", "_");
-
-
-        String fileName = safeName+ "_" + UUID.randomUUID().toString() + ".jpg";
-
+        String fileName = user.getName() + "_" + UUID.randomUUID().toString();
 
         try {
             Path filePath = uploadPath.resolve(fileName);
@@ -122,6 +121,58 @@ public class UserService {
             throw new RuntimeException(e);
         }
         return fileName;
+
+// Replace spaces with underscore
+//        String safeName = name.trim().replaceAll("\\s+", "_");
+//        String fileName = safeName+ "_" + UUID.randomUUID().toString() + ".jpg";
+
+    }
+
+
+    public String saveImageForJobSeeker(MultipartFile file, JobSeeker jobSeeker) {
+        Path uploadPath = Paths.get(uploadDir + "/jobSeeker");
+        if (!Files.exists(uploadPath)) {
+            try {
+                Files.createDirectory(uploadPath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+        String jobSeekerName = jobSeeker.getName();
+        String fileName = jobSeekerName.trim().replaceAll("\\s+", "_");
+
+        String savedFileName = fileName + "_" + UUID.randomUUID().toString();
+
+        try {
+            Path filePath = uploadPath.resolve(savedFileName);
+            Files.copy(file.getInputStream(), filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return savedFileName;
+
+    }
+
+
+    public void registerJobSeeker(User user, MultipartFile imageFile, JobSeeker jobSeeker) {
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+
+            String fileName = saveImage(imageFile, user);
+            String jobSeekerPhoto = saveImageForJobSeeker(imageFile, jobSeeker);
+            jobSeeker.setPhoto(jobSeekerPhoto);
+            user.setPhoto(fileName);
+        }
+
+        user.setRole(Role.JOBSEEKER);
+        User savedUser = userRepo.save(user);
+
+        jobSeeker.setUser(savedUser);
+        jobSeekerService.save(jobSeeker);
+        sendActivationEmail(savedUser);
+
     }
 
 
